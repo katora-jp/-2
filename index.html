@@ -1,0 +1,135 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Video Tools</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0; padding: 24px 16px;
+  font-family: system-ui, sans-serif;
+  background: #10131b; color: #f5f5f5;
+}
+main {
+  max-width: 680px; margin: 40px auto;
+  background: #1c2230; padding: 24px;
+  border-radius: 18px;
+}
+h1 { font-size: 26px; }
+p { color: #b8c2d6; line-height: 1.6; }
+input, button {
+  width: 100%; padding: 14px; margin-top: 10px;
+  border-radius: 10px; font-size: 16px;
+}
+input { border: 1px solid #48536a; background: #10131b; color: white; }
+button { border: 0; background: #6c8cff; color: white; }
+video, iframe {
+  width: 100%; margin-top: 20px;
+  border: 0; border-radius: 12px;
+}
+a { color: #a9c0ff; overflow-wrap: anywhere; }
+#result { margin-top: 20px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>My Video Tools</h1>
+  <p>動画URLを入力して、対応する動画を表示します。</p>
+  <input id="url" type="url"
+    placeholder="動画URLを入力してください">
+  <button id="check">URLを解析</button>
+  <div id="result" aria-live="polite"></div>
+</main>
+
+<script>
+const input = document.getElementById("url");
+const result = document.getElementById("result");
+
+document.getElementById("check").onclick = () => {
+  result.replaceChildren();
+
+  let u;
+  try {
+    u = new URL(input.value.trim());
+    if (!["https:", "http:"].includes(u.protocol)) {
+      throw new Error();
+    }
+  } catch {
+    result.textContent = "正しいURLを入力してください。";
+    return;
+  }
+
+  const msg = document.createElement("p");
+  result.appendChild(msg);
+
+  if (u.hostname === "youtu.be" ||
+      ["youtube.com", "www.youtube.com",
+       "m.youtube.com", "youtube-nocookie.com",
+       "www.youtube-nocookie.com"].includes(u.hostname)) {
+
+    let id = "";
+    if (u.hostname === "youtu.be") {
+      id = u.pathname.split("/").filter(Boolean)[0] || "";
+    } else if (u.pathname === "/watch") {
+      id = u.searchParams.get("v") || "";
+    } else if (/^\/(embed|shorts)\/[^/]+/.test(u.pathname)) {
+      id = u.pathname.split("/")[2];
+    }
+
+    if (!/^[\w-]{11}$/.test(id)) {
+      msg.textContent = "動画URLを認識できませんでした。";
+      return;
+    }
+
+    msg.textContent =
+      "YouTube動画です。以下で公式プレーヤーを表示します。";
+
+    const frame = document.createElement("iframe");
+    frame.src = "https://www.youtube-nocookie.com/embed/" + id;
+    frame.title = "YouTube動画プレーヤー";
+    frame.allow =
+      "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+    frame.allowFullscreen = true;
+    frame.referrerPolicy = "strict-origin-when-cross-origin";
+    result.appendChild(frame);
+
+    const note = document.createElement("p");
+    note.textContent =
+      "MP4ファイルが必要な場合は、投稿者が提供するファイルや公式のダウンロード機能を利用してください。";
+    result.appendChild(note);
+    return;
+  }
+
+  if (!["http:", "https:"].includes(u.protocol)) {
+    msg.textContent = "このURL形式には対応していません。";
+    return;
+  }
+
+  if (!/\.mp4$/i.test(u.pathname)) {
+    msg.textContent =
+      "直接MP4ファイルのURLではないようです。";
+    return;
+  }
+
+  msg.textContent = "MP4への直接リンクを確認しました。";
+
+  const video = document.createElement("video");
+  video.controls = true;
+  video.playsInline = true;
+  video.preload = "metadata";
+  video.src = u.href;
+  result.appendChild(video);
+
+  const link = document.createElement("a");
+  link.href = u.href;
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  link.textContent = "MP4ファイルを開く";
+  result.appendChild(document.createElement("br"));
+  result.appendChild(link);
+};
+</script>
+</body>
+</html>
