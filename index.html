@@ -86,6 +86,24 @@ document.getElementById("check").onclick = () => {
     msg.textContent =
       "YouTube動画です。以下で公式プレーヤーを表示します。";
 
+const info = document.createElement("div");
+info.style.marginTop = "16px";
+
+const thumbnail = document.createElement("img");
+thumbnail.src =
+  "https://i.ytimg.com/vi/" + id + "/hqdefault.jpg";
+thumbnail.alt = "動画のサムネイル";
+thumbnail.style.width = "100%";
+thumbnail.style.borderRadius = "12px";
+thumbnail.style.display = "block";
+
+const videoId = document.createElement("p");
+videoId.textContent = "動画ID: " + id;
+
+info.appendChild(thumbnail);
+info.appendChild(videoId);
+result.appendChild(info);
+
     const frame = document.createElement("iframe");
     frame.src = "https://www.youtube-nocookie.com/embed/" + id;
     frame.title = "YouTube動画プレーヤー";
