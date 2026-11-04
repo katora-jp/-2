@@ -41,6 +41,43 @@ a { color: #a9c0ff; overflow-wrap: anywhere; }
     placeholder="動画URLを入力してください">
   <button id="check">URLを解析</button>
   <div id="result" aria-live="polite"></div>
+  
+<section id="uploadSection"
+  style="margin-top:30px;padding:18px;
+  background:#252d3d;border-radius:14px;">
+
+  <h2>MP4ファイルをアップロード</h2>
+
+  <p>iPad内の動画ファイルを選択してください。</p>
+
+  <input
+    type="file"
+    id="mp4File"
+    accept="video/mp4,.mp4"
+    style="display:block;width:100%;margin:16px 0;"
+  >
+
+  <p id="fileInfo" aria-live="polite">
+    まだ動画が選択されていません。
+  </p>
+
+  <video
+    id="uploadedVideo"
+    controls
+    playsinline
+    style="display:none;width:100%;
+    margin-top:16px;border-radius:12px;">
+  </video>
+
+  <a
+    id="downloadMP4"
+    style="display:none;margin-top:16px;"
+    download>
+    MP4ファイルを保存
+  </a>
+
+</section>
+
 </main>
 
 <script>
@@ -149,5 +186,52 @@ result.appendChild(info);
   result.appendChild(link);
 };
 </script>
+  
+const mp4File = document.getElementById("mp4File");
+const uploadedVideo =
+  document.getElementById("uploadedVideo");
+const fileInfo = document.getElementById("fileInfo");
+const downloadMP4 =
+  document.getElementById("downloadMP4");
+
+let currentVideoURL = null;
+
+mp4File.addEventListener("change", () => {
+  const file = mp4File.files[0];
+
+  if (!file) return;
+
+  const isMP4 =
+    file.type === "video/mp4" ||
+    /\.mp4$/i.test(file.name);
+
+  if (!isMP4) {
+    fileInfo.textContent =
+      "MP4ファイルを選択してください。";
+    mp4File.value = "";
+    return;
+  }
+
+  if (currentVideoURL) {
+    URL.revokeObjectURL(currentVideoURL);
+  }
+
+  currentVideoURL = URL.createObjectURL(file);
+
+  uploadedVideo.src = currentVideoURL;
+  uploadedVideo.style.display = "block";
+
+  fileInfo.textContent =
+    "ファイル名: " + file.name +
+    " / サイズ: " +
+    (file.size / (1024 * 1024)).toFixed(2) +
+    " MB";
+
+  downloadMP4.href = currentVideoURL;
+  downloadMP4.download = file.name;
+  downloadMP4.style.display = "inline-block";
+  downloadMP4.textContent = "MP4ファイルを保存";
+});
+
 </body>
 </html>
