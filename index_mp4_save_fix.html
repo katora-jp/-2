@@ -1,379 +1,1000 @@
+```html
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#ffffff">
-  <title>Video Saver - Online Video Tools</title>
-  <style>
-    :root {
-      --blue: #2563eb;
-      --blue-dark: #1d4ed8;
-      --ink: #172033;
-      --muted: #667085;
-      --line: #e5e9f0;
-      --surface: #f6f8fc;
-      --white: #fff;
-      --green: #15803d;
-      --red: #b42318;
-      --shadow: 0 16px 45px rgba(31, 48, 82, .08);
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      color: var(--ink);
-      background: #f7f9fc;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      line-height: 1.55;
-    }
-    button, input { font: inherit; }
-    .topbar {
-      height: 68px;
-      background: rgba(255,255,255,.94);
-      border-bottom: 1px solid var(--line);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 max(20px, calc((100% - 1080px)/2));
-      gap: 16px;
-    }
-    .brand { display:flex; align-items:center; gap:10px; font-weight:800; font-size:19px; }
-    .brand-mark {
-      width:34px; height:34px; border-radius:11px; display:grid; place-items:center;
-      color:#fff; background:linear-gradient(135deg,#3982ff,#2455d8); font-size:18px;
-    }
-    .top-note { color:var(--muted); font-size:13px; }
-    main { max-width: 900px; margin: 0 auto; padding: 58px 20px 70px; }
-    .hero { text-align:center; margin-bottom:28px; }
-    .eyebrow {
-      display:inline-block; padding:6px 12px; border-radius:99px;
-      background:#eaf1ff; color:var(--blue); font-size:12px; font-weight:700;
-    }
-    h1 { margin:16px 0 10px; font-size:clamp(28px,5vw,42px); line-height:1.2; letter-spacing:-1.2px; }
-    .lead { margin:0 auto; max-width:620px; color:var(--muted); font-size:15px; }
-    .panel {
-      background:var(--white); border:1px solid var(--line); border-radius:20px;
-      padding:26px; box-shadow:var(--shadow);
-    }
-    .field-label { display:block; font-weight:700; font-size:14px; margin-bottom:10px; }
-    .input-wrap { display:flex; gap:10px; }
-    input[type="url"] {
-      min-width:0; flex:1; height:54px; padding:0 16px; border:1px solid #d7deea;
-      border-radius:12px; outline:none; color:var(--ink); background:#fff;
-    }
-    input[type="url"]:focus { border-color:var(--blue); box-shadow:0 0 0 3px #2563eb1c; }
-    .primary, .secondary, .download {
-      border:0; border-radius:12px; cursor:pointer; font-weight:700;
-      transition:background .15s, transform .15s;
-    }
-    .primary { min-width:116px; padding:0 20px; color:#fff; background:var(--blue); }
-    .primary:hover { background:var(--blue-dark); }
-    button:active { transform:scale(.98); }
-    .secondary { padding:10px 14px; color:#344054; background:#eef2f7; }
-    .hint { margin:11px 0 0; color:var(--muted); font-size:12px; }
-    .status { display:none; margin-top:16px; padding:12px 14px; border-radius:10px; font-size:13px; }
-    .status.show { display:block; }
-    .status.error { color:var(--red); background:#fff1f0; }
-    .status.info { color:#1d4ed8; background:#eff6ff; }
-    .status.success { color:var(--green); background:#ecfdf3; }
-    .result { display:none; margin-top:22px; border-top:1px solid var(--line); padding-top:22px; }
-    .result.show { display:block; }
-    .result-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; }
-    .result-head h2 { margin:0; font-size:18px; }
-    .tag { display:inline-flex; align-items:center; border-radius:99px; padding:5px 10px; font-size:12px; font-weight:700; color:#175cd3; background:#eff6ff; }
-    .preview {
-      width:100%; aspect-ratio:16/9; background:#101828; border-radius:14px;
-      overflow:hidden; display:grid; place-items:center; color:#fff;
-    }
-    .preview iframe, .preview video { width:100%; height:100%; border:0; object-fit:contain; }
-    .preview-placeholder { padding:20px; text-align:center; color:#d0d5dd; font-size:14px; }
-    .details { margin-top:16px; display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-    .detail { padding:13px 14px; background:var(--surface); border-radius:11px; min-width:0; }
-    .detail small { display:block; color:var(--muted); font-size:11px; margin-bottom:4px; }
-    .detail strong { display:block; font-size:14px; overflow-wrap:anywhere; }
-    .actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:16px; }
-    .download { display:inline-flex; align-items:center; justify-content:center; padding:12px 18px; color:#fff; background:var(--green); text-decoration:none; }
-    .download.disabled { opacity:.45; pointer-events:none; }
-    .notice {
-      margin-top:20px; padding:14px 16px; border:1px solid #f2d6a2;
-      border-radius:12px; background:#fffaeb; color:#854a0e; font-size:12px;
-    }
-    .features { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:24px; }
-    .feature { background:#fff; border:1px solid var(--line); border-radius:14px; padding:17px; }
-    .feature-icon { font-size:21px; }
-    .feature strong { display:block; margin:8px 0 4px; font-size:13px; }
-    .feature p { margin:0; color:var(--muted); font-size:12px; }
-    footer { text-align:center; color:#98a2b3; font-size:12px; padding:0 20px 30px; }
-    @media (max-width:620px) {
-      .topbar { height:58px; padding:0 16px; }
-      .top-note { display:none; }
-      main { padding:38px 14px 50px; }
-      .panel { padding:18px; border-radius:16px; }
-      .input-wrap { flex-direction:column; }
-      .primary { height:50px; }
-      .details { grid-template-columns:1fr; }
-      .features { grid-template-columns:1fr; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#111827">
+<meta name="description" content="動画URL解析・YouTubeプレビュー・MP4動画プレビューと保存に対応したVideo Link Studio">
+
+<title>Video Link Studio</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  background: #0f172a;
+  color: #f8fafc;
+  min-height: 100vh;
+}
+
+header {
+  padding: 24px 16px;
+  text-align: center;
+  background: #111827;
+  border-bottom: 1px solid #334155;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 27px;
+  letter-spacing: 1px;
+}
+
+header p {
+  color: #94a3b8;
+  font-size: 13px;
+  margin-bottom: 0;
+}
+
+main {
+  width: min(100% - 28px, 760px);
+  margin: 28px auto;
+}
+
+.panel {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+h2 {
+  font-size: 18px;
+  margin: 0 0 15px;
+}
+
+.description {
+  color: #94a3b8;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+input {
+  width: 100%;
+  padding: 15px;
+  background: #0f172a;
+  color: white;
+  border: 1px solid #475569;
+  border-radius: 9px;
+  font-size: 15px;
+  outline: none;
+}
+
+input:focus {
+  border-color: #60a5fa;
+}
+
+button {
+  border: none;
+  border-radius: 9px;
+  padding: 13px 17px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #2563eb;
+  color: white;
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+button.secondary {
+  background: #475569;
+}
+
+button.success {
+  background: #059669;
+}
+
+button:hover:not(:disabled) {
+  filter: brightness(1.12);
+}
+
+.button-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+#status {
+  margin-top: 15px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #cbd5e1;
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.result {
+  display: none;
+  margin-top: 18px;
+}
+
+.result-card {
+  padding: 14px;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  margin-top: 10px;
+}
+
+.result-card p {
+  font-size: 13px;
+  color: #cbd5e1;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+}
+
+.badge {
+  display: inline-block;
+  padding: 5px 9px;
+  border-radius: 20px;
+  font-size: 11px;
+  background: #334155;
+  color: #bfdbfe;
+}
+
+.badge.green {
+  background: #064e3b;
+  color: #a7f3d0;
+}
+
+.badge.orange {
+  background: #78350f;
+  color: #fde68a;
+}
+
+#youtube-player,
+#mp4-player {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: black;
+  border-radius: 10px;
+  margin-top: 14px;
+}
+
+#mp4-player {
+  display: none;
+}
+
+.save-area {
+  margin-top: 15px;
+}
+
+.save-area button {
+  width: 100%;
+}
+
+.text-link {
+  color: #93c5fd;
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+footer {
+  padding: 25px 15px;
+  text-align: center;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+@media (max-width: 480px) {
+  header h1 {
+    font-size: 23px;
+  }
+
+  .panel {
+    padding: 16px;
+  }
+
+  .button-group {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
 </head>
+
 <body>
-  <header class="topbar">
-    <div class="brand"><span class="brand-mark">▶</span><span>Video Saver</span></div>
-    <div class="top-note">Online Video Tools</div>
-  </header>
 
-  <main>
-    <section class="hero">
-      <span class="eyebrow">ONLINE VIDEO TOOL</span>
-      <h1>動画URLをかんたんチェック</h1>
-      <p class="lead">動画のURLを入力すると、対応状況を確認してプレビューできます。許可されたMP4配布リンクの保存にも対応します。</p>
-    </section>
+<header>
+  <h1>Video Link Studio</h1>
+  <p>Video URL Analyzer & Preview Studio</p>
+</header>
 
-    <section class="panel" aria-label="動画URL解析">
-      <label class="field-label" for="videoUrl">動画URLを入力</label>
-      <div class="input-wrap">
-        <input id="videoUrl" type="url" inputmode="url" autocomplete="url"
-          placeholder="https://example.com/video.mp4 または YouTube URL">
-        <button class="primary" id="analyzeBtn" type="button">URLを解析</button>
+<main>
+
+  <!-- URL解析 -->
+  <section class="panel">
+
+    <h2>動画URL解析</h2>
+
+    <p class="description">
+      YouTubeのURLまたはMP4の直接URLを入力してください。
+    </p>
+
+    <input
+      id="video-url"
+      type="url"
+      placeholder="https://www.youtube.com/watch?v=..."
+      autocomplete="url"
+      spellcheck="false"
+    >
+
+    <div class="button-group">
+
+      <button id="analyze-btn" type="button">
+        URLを解析する
+      </button>
+
+      <button id="clear-btn" class="secondary" type="button">
+        クリア
+      </button>
+
+    </div>
+
+    <div id="status" role="status" aria-live="polite">
+      動画URLを入力してください。
+    </div>
+
+    <!-- 解析結果 -->
+    <div id="analysis-result" class="result">
+
+      <div class="result-card">
+
+        <span class="badge green">解析完了</span>
+
+        <p>
+          <strong>動画の種類：</strong>
+          <span id="video-type"></span>
+        </p>
+
+        <p>
+          <strong>URL：</strong>
+          <span id="video-address"></span>
+        </p>
+
+        <p>
+          <strong>動画ID：</strong>
+          <span id="video-id">なし</span>
+        </p>
+
+        <p>
+          <strong>対応状況：</strong>
+          <span id="video-support"></span>
+        </p>
+
       </div>
-      <p class="hint">YouTubeは公式プレビュー、MP4は投稿者が配布・保存を許可した直接URLに対応します。</p>
-      <div id="status" class="status" role="status" aria-live="polite"></div>
 
-      <section id="result" class="result" aria-live="polite">
-        <div class="result-head">
-          <h2>解析結果</h2>
-          <span id="typeTag" class="tag">確認済み</span>
-        </div>
-        <div id="preview" class="preview">
-          <div class="preview-placeholder">動画プレビューがここに表示されます</div>
-        </div>
-        <div class="details">
-          <div class="detail"><small>動画サービス / 種類</small><strong id="serviceValue">-</strong></div>
-          <div class="detail"><small>形式</small><strong id="formatValue">-</strong></div>
-          <div class="detail"><small>動画ID / ファイル</small><strong id="idValue">-</strong></div>
-          <div class="detail"><small>保存機能</small><strong id="downloadValue">-</strong></div>
-        </div>
-        <div class="actions">
-          <a id="downloadLink" class="download disabled" href="#" rel="noopener">MP4を保存</a>
-          <button id="openLink" class="secondary" type="button">元のURLを開く</button>
-          <button id="clearBtn" class="secondary" type="button">結果をクリア</button>
-        </div>
-      </section>
-      <div class="notice">
-        <strong>利用上の注意：</strong>自分が権利を持つ動画、または投稿者から保存の許可を得た動画だけを保存してください。YouTubeなどの動画サービスから、公式に提供されていない方法で動画ファイルを抽出する機能はありません。MP4の保存可否は配布元の設定やブラウザの仕様にも左右されます。
-      </div>
-    </section>
+    </div>
 
-    <section class="features" aria-label="機能">
-      <article class="feature"><div class="feature-icon">🔗</div><strong>URLチェック</strong><p>入力されたURLの種類と対応状況を判定します。</p></article>
-      <article class="feature"><div class="feature-icon">▶️</div><strong>動画プレビュー</strong><p>YouTubeの公式埋め込みやMP4プレビューを表示します。</p></article>
-      <article class="feature"><div class="feature-icon">⬇️</div><strong>MP4保存</strong><p>許可されたMP4の直接配布リンクから保存を試せます。</p></article>
-    </section>
-  </main>
+  </section>
 
-  <footer>Video Saver · 個人制作の動画URLチェックツール</footer>
 
-  <script>
-    "use strict";
+  <!-- YouTubeプレビュー -->
+  <section id="youtube-section" class="panel hidden">
 
-    const urlInput = document.getElementById("videoUrl");
-    const analyzeBtn = document.getElementById("analyzeBtn");
-    const statusBox = document.getElementById("status");
-    const resultBox = document.getElementById("result");
-    const previewBox = document.getElementById("preview");
-    const typeTag = document.getElementById("typeTag");
-    const serviceValue = document.getElementById("serviceValue");
-    const formatValue = document.getElementById("formatValue");
-    const idValue = document.getElementById("idValue");
-    const downloadValue = document.getElementById("downloadValue");
-    const downloadLink = document.getElementById("downloadLink");
-    const openLink = document.getElementById("openLink");
-    const clearBtn = document.getElementById("clearBtn");
+    <h2>YouTubeプレビュー</h2>
 
-    let currentUrl = "";
+    <span class="badge green">YouTube</span>
 
-    function showStatus(message, type) {
-      statusBox.textContent = message;
-      statusBox.className = "status show " + type;
+    <iframe
+      id="youtube-player"
+      title="YouTube動画プレビュー"
+      src="about:blank"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      referrerpolicy="strict-origin-when-cross-origin"
+      allowfullscreen
+    ></iframe>
+
+    <p class="description">
+      YouTube公式の埋め込みプレーヤーを使用しています。
+    </p>
+
+    <a
+      id="youtube-link"
+      class="text-link"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      YouTubeで開く
+    </a>
+
+  </section>
+
+
+  <!-- MP4プレビュー・保存 -->
+  <section id="mp4-section" class="panel hidden">
+
+    <h2>MP4動画プレビュー・保存</h2>
+
+    <span class="badge green">MP4</span>
+
+    <p class="description">
+      自分が所有する動画、または保存許可を得た動画を対象とします。
+    </p>
+
+    <video
+      id="mp4-player"
+      controls
+      playsinline
+      preload="metadata"
+    ></video>
+
+    <div id="mp4-info" class="result-card">
+
+      <p>
+        <strong>取得状態：</strong>
+        <span id="mp4-state">未取得</span>
+      </p>
+
+      <p>
+        <strong>ファイルサイズ：</strong>
+        <span id="mp4-size">未確認</span>
+      </p>
+
+      <p>
+        <strong>ファイル名：</strong>
+        <span id="mp4-name">video.mp4</span>
+      </p>
+
+    </div>
+
+    <div class="save-area">
+
+      <button
+        id="mp4-download"
+        class="success"
+        type="button"
+        disabled
+      >
+        MP4ファイルを保存
+      </button>
+
+    </div>
+
+    <a
+      id="mp4-direct-link"
+      class="text-link"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      元の動画を別タブで開く
+    </a>
+
+    <p class="description">
+      直接取得できない場合は、配信元のCORS設定やアクセス権限が原因の可能性があります。
+    </p>
+
+  </section>
+
+
+  <!-- 使い方 -->
+  <section class="panel">
+
+    <h2>使い方</h2>
+
+    <p class="description">
+      1. 動画URLを入力します。
+      <br>
+      2. URLを解析するボタンを押します。
+      <br>
+      3. YouTubeならプレビューを表示します。
+      <br>
+      4. MP4の直接URLなら動画を確認します。
+      <br>
+      5. 保存可能な場合はMP4ファイルを保存します。
+    </p>
+
+  </section>
+
+</main>
+
+<footer>
+  Video Link Studio
+  <br>
+  GitHub Pages Edition
+</footer>
+
+
+<script>
+(() => {
+
+  "use strict";
+
+  // ====================================
+  // DOM取得
+  // ====================================
+
+  const $ = (id) => document.getElementById(id);
+
+  const input = $("video-url");
+  const analyzeBtn = $("analyze-btn");
+  const clearBtn = $("clear-btn");
+  const status = $("status");
+
+  const analysisResult = $("analysis-result");
+
+  const youtubeSection = $("youtube-section");
+  const youtubePlayer = $("youtube-player");
+  const youtubeLink = $("youtube-link");
+
+  const mp4Section = $("mp4-section");
+  const mp4Player = $("mp4-player");
+  const mp4Download = $("mp4-download");
+  const mp4DirectLink = $("mp4-direct-link");
+
+  const mp4State = $("mp4-state");
+  const mp4Size = $("mp4-size");
+  const mp4Name = $("mp4-name");
+
+  // ====================================
+  // 状態管理
+  // ====================================
+
+  let currentBlob = null;
+  let currentObjectURL = null;
+  let currentFileName = "video.mp4";
+  let currentDirectURL = "";
+  let abortController = null;
+
+  // ====================================
+  // 共通処理
+  // ====================================
+
+  function setStatus(message) {
+    status.textContent = message;
+  }
+
+  function formatSize(bytes) {
+
+    if (bytes < 1024) {
+      return bytes + " B";
     }
 
-    function hideStatus() {
-      statusBox.textContent = "";
-      statusBox.className = "status";
+    if (bytes < 1024 * 1024) {
+      return (bytes / 1024).toFixed(2) + " KB";
     }
 
-    function resetResult() {
-      resultBox.classList.remove("show");
-      previewBox.replaceChildren();
-      const placeholder = document.createElement("div");
-      placeholder.className = "preview-placeholder";
-      placeholder.textContent = "動画プレビューがここに表示されます";
-      previewBox.appendChild(placeholder);
-      downloadLink.href = "#";
-      downloadLink.classList.add("disabled");
-      downloadLink.removeAttribute("download");
-      currentUrl = "";
+    if (bytes < 1024 * 1024 * 1024) {
+      return (bytes / (1024 * 1024)).toFixed(2) + " MB";
     }
 
-    function parseYouTubeId(url) {
-      const host = url.hostname.toLowerCase().replace(/^www\./, "");
-      if (host === "youtu.be") {
-        return url.pathname.split("/").filter(Boolean)[0] || null;
+    return (bytes / (1024 * 1024 * 1024)).toFixed(2) + " GB";
+
+  }
+
+  function getSafeFileName(url) {
+
+    let name = "video.mp4";
+
+    try {
+
+      const pathname = new URL(url).pathname;
+
+      const last = pathname.split("/").pop();
+
+      if (last && last.toLowerCase().endsWith(".mp4")) {
+
+        name = decodeURIComponent(last);
+
       }
-      if (host === "youtube.com" || host === "m.youtube.com" || host === "music.youtube.com") {
-        if (url.pathname === "/watch") return url.searchParams.get("v");
-        const parts = url.pathname.split("/").filter(Boolean);
-        if (["embed", "shorts", "live"].includes(parts[0])) return parts[1] || null;
-      }
-      return null;
+
+    } catch (error) {
+
+      // 初期値を使用
+
     }
 
-    function isYouTubeHost(host) {
-      const h = host.toLowerCase().replace(/^www\./, "");
-      return ["youtube.com", "m.youtube.com", "music.youtube.com", "youtu.be"].includes(h);
+    return name
+      .replace(/[\\/:*?"<>|]/g, "_")
+      .slice(0, 120);
+
+  }
+
+  function revokePreview() {
+
+    if (currentObjectURL) {
+
+      URL.revokeObjectURL(currentObjectURL);
+
+      currentObjectURL = null;
+
     }
 
-    function isDirectMp4(url) {
-      return /\.mp4$/i.test(url.pathname);
+  }
+
+  function resetPlayers() {
+
+    // 前回の取得処理を停止
+    if (abortController) {
+
+      abortController.abort();
+
+      abortController = null;
+
     }
 
-    function setCommonDetails(service, format, id, downloadText, tag) {
-      serviceValue.textContent = service;
-      formatValue.textContent = format;
-      idValue.textContent = id;
-      downloadValue.textContent = downloadText;
-      typeTag.textContent = tag;
-      resultBox.classList.add("show");
+    // YouTube
+    youtubePlayer.src = "about:blank";
+
+    youtubeSection.classList.add("hidden");
+
+    // MP4
+    mp4Player.pause();
+
+    mp4Player.removeAttribute("src");
+
+    mp4Player.load();
+
+    mp4Player.style.display = "none";
+
+    mp4Section.classList.add("hidden");
+
+    revokePreview();
+
+    currentBlob = null;
+
+    currentDirectURL = "";
+
+    currentFileName = "video.mp4";
+
+    mp4Download.disabled = true;
+
+    mp4State.textContent = "未取得";
+
+    mp4Size.textContent = "未確認";
+
+    mp4Name.textContent = "video.mp4";
+
+    mp4DirectLink.removeAttribute("href");
+
+    analysisResult.style.display = "none";
+
+  }
+
+  // ====================================
+  // YouTube URL解析
+  // ====================================
+
+  function getYouTubeID(url) {
+
+    const host = url.hostname.toLowerCase();
+
+    let id = null;
+
+    if (
+      host === "youtu.be" ||
+      host === "www.youtu.be"
+    ) {
+
+      id = url.pathname.split("/").filter(Boolean)[0];
+
     }
 
-    function analyze() {
-      hideStatus();
-      resetResult();
+    else if (
+      host === "youtube.com" ||
+      host === "www.youtube.com" ||
+      host === "m.youtube.com" ||
+      host === "youtube-nocookie.com" ||
+      host === "www.youtube-nocookie.com"
+    ) {
 
-      const raw = urlInput.value.trim();
-      if (!raw) {
-        showStatus("動画URLを入力してください。", "error");
-        return;
+      if (url.pathname === "/watch") {
+
+        id = url.searchParams.get("v");
+
       }
 
-      let url;
-      try {
-        url = new URL(raw);
-      } catch (_) {
-        showStatus("URLの形式が正しくありません。https:// から始まるURLを入力してください。", "error");
-        return;
-      }
+      else {
 
-      if (!["https:", "http:"].includes(url.protocol)) {
-        showStatus("http または https のURLを入力してください。", "error");
-        return;
-      }
+        const match = url.pathname.match(
+          /^\/(?:embed|shorts|live)\/([a-zA-Z0-9_-]{11})/
+        );
 
-      if (isYouTubeHost(url.hostname)) {
-        const videoId = parseYouTubeId(url);
-        if (!videoId || !/^[a-zA-Z0-9_-]{6,20}$/.test(videoId)) {
-          showStatus("YouTubeの動画URLを認識できませんでした。動画ページのURLを確認してください。", "error");
-          return;
+        if (match) {
+
+          id = match[1];
+
         }
 
-        const iframe = document.createElement("iframe");
-        iframe.src = "https://www.youtube-nocookie.com/embed/" + encodeURIComponent(videoId);
-        iframe.title = "YouTube動画プレビュー";
-        iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
-        iframe.allowFullscreen = true;
-        previewBox.replaceChildren(iframe);
-
-        setCommonDetails("YouTube", "公式プレビュー", videoId, "公式ダウンロード機能を利用", "プレビュー対応");
-        showStatus("YouTube動画を認識しました。プレビューを表示しています。動画ファイルの直接保存には対応していません。", "info");
-        currentUrl = url.href;
-        return;
       }
 
-      if (isDirectMp4(url)) {
-        const video = document.createElement("video");
-        video.src = url.href;
-        video.controls = true;
-        video.playsInline = true;
-        video.preload = "metadata";
-        video.addEventListener("error", () => {
-          showStatus("MP4を読み込めませんでした。URLが有効か、配布元が外部サイトからの再生を許可しているか確認してください。", "error");
-        }, { once: true });
-        previewBox.replaceChildren(video);
-
-        const fileName = url.pathname.split("/").filter(Boolean).pop() || "video.mp4";
-        setCommonDetails("直接MP4リンク", "MP4", fileName, "許可されたリンクで保存可能", "MP4候補");
-        downloadLink.href = url.href;
-        downloadLink.classList.remove("disabled");
-        downloadLink.setAttribute("download", fileName);
-        showStatus("MP4形式の直接URLを認識しました。投稿者が保存を許可していることを確認してから保存してください。", "success");
-        currentUrl = url.href;
-        return;
-      }
-
-      showStatus("このURL形式にはまだ対応していません。YouTubeの動画ページURL、または .mp4 で終わる直接配布URLを入力してください。", "error");
     }
 
-    // MP4保存：CORSが許可されている配布元ではBlobとして保存を試す。
-    // CORSで拒否された場合は、iPadの共有メニューから保存できるよう元URLを開く。
-    downloadLink.addEventListener("click", async (event) => {
-      if (!currentUrl || downloadLink.classList.contains("disabled")) {
-        event.preventDefault();
+    if (
+      id &&
+      /^[a-zA-Z0-9_-]{11}$/.test(id)
+    ) {
+
+      return id;
+
+    }
+
+    return null;
+
+  }
+
+  // ====================================
+  // URL解析処理
+  // ====================================
+
+  async function analyzeURL() {
+
+    resetPlayers();
+
+    const rawURL = input.value.trim();
+
+    if (!rawURL) {
+
+      setStatus("URLを入力してください。");
+
+      return;
+
+    }
+
+    let url;
+
+    try {
+
+      url = new URL(rawURL);
+
+    } catch (error) {
+
+      setStatus("URLの形式が正しくありません。");
+
+      return;
+
+    }
+
+    if (url.protocol !== "https:") {
+
+      setStatus("HTTPSのURLを入力してください。");
+
+      return;
+
+    }
+
+    if (url.username || url.password) {
+
+      setStatus("ユーザー名やパスワードを含むURLには対応していません。");
+
+      return;
+
+    }
+
+    const normalizedURL = url.href;
+
+    $("video-address").textContent = normalizedURL;
+
+    analysisResult.style.display = "block";
+
+    // ====================================
+    // YouTube判定
+    // ====================================
+
+    const youtubeID = getYouTubeID(url);
+
+    if (youtubeID) {
+
+      $("video-type").textContent = "YouTube";
+
+      $("video-id").textContent = youtubeID;
+
+      $("video-support").textContent =
+        "公式埋め込みプレビューに対応";
+
+      youtubeSection.classList.remove("hidden");
+
+      youtubePlayer.src =
+        "https://www.youtube-nocookie.com/embed/" +
+        encodeURIComponent(youtubeID);
+
+      youtubeLink.href =
+        "https://www.youtube.com/watch?v=" +
+        encodeURIComponent(youtubeID);
+
+      setStatus(
+        "YouTube URLを解析しました。プレビューを表示しています。"
+      );
+
+      return;
+
+    }
+
+    // ====================================
+    // MP4直接URL判定
+    // ====================================
+
+    const isMP4 =
+      url.pathname.toLowerCase().endsWith(".mp4");
+
+    if (isMP4) {
+
+      $("video-type").textContent = "MP4直接URL";
+
+      $("video-id").textContent = "なし";
+
+      $("video-support").textContent =
+        "動画プレビュー・ファイル取得を確認します";
+
+      mp4Section.classList.remove("hidden");
+
+      mp4DirectLink.href = normalizedURL;
+
+      currentDirectURL = normalizedURL;
+
+      currentFileName = getSafeFileName(normalizedURL);
+
+      mp4Name.textContent = currentFileName;
+
+      setStatus(
+        "MP4のURLを認識しました。動画ファイルを確認します。"
+      );
+
+      await loadMP4(normalizedURL);
+
+      return;
+
+    }
+
+    // ====================================
+    // その他のURL
+    // ====================================
+
+    $("video-type").textContent = "その他のURL";
+
+    $("video-id").textContent = "なし";
+
+    $("video-support").textContent =
+      "動画ファイル形式を自動判定できません";
+
+    setStatus(
+      "URLの解析は完了しましたが、対応する動画形式を判定できませんでした。MP4の直接URLを使用してください。"
+    );
+
+  }
+
+  // ====================================
+  // MP4読み込み処理
+  // ====================================
+
+  async function loadMP4(url) {
+
+    mp4Section.classList.remove("hidden");
+
+    mp4Player.style.display = "block";
+
+    mp4DirectLink.href = url;
+
+    mp4State.textContent = "確認中";
+
+    mp4Download.disabled = true;
+
+    abortController = new AbortController();
+
+    const controller = abortController;
+
+    try {
+
+      setStatus(
+        "MP4ファイルを取得しています。動画サイズによって時間がかかります。"
+      );
+
+      const response = await fetch(url, {
+
+        method: "GET",
+
+        mode: "cors",
+
+        credentials: "omit",
+
+        signal: controller.signal
+
+      });
+
+      if (!response.ok) {
+
+        throw new Error(
+          "HTTPエラー: " + response.status
+        );
+
+      }
+
+      const contentType =
+        response.headers.get("content-type") || "";
+
+      const validType =
+        contentType.toLowerCase().includes("video/mp4") ||
+        contentType.toLowerCase().includes("application/octet-stream");
+
+      if (!validType) {
+
+        throw new Error(
+          "MP4形式ではない可能性があります。"
+        );
+
+      }
+
+      const blob = await response.blob();
+
+      if (controller !== abortController) {
+
         return;
+
       }
 
-      event.preventDefault();
-      const targetUrl = currentUrl;
-      const originalText = downloadLink.textContent;
-      downloadLink.textContent = "保存を準備中…";
-      downloadLink.classList.add("disabled");
-      showStatus("MP4を取得しています。ファイルサイズや配布元の設定によって時間がかかる場合があります。", "info");
+      if (blob.size === 0) {
 
-      try {
-        const response = await fetch(targetUrl, { mode: "cors" });
-        if (!response.ok) {
-          throw new Error("HTTP " + response.status);
-        }
+        throw new Error("動画ファイルが空です。");
 
-        const blob = await response.blob();
-        if (!blob.size) {
-          throw new Error("空のファイルです");
-        }
-
-        const objectUrl = URL.createObjectURL(blob);
-        const temporaryLink = document.createElement("a");
-        const filename = new URL(targetUrl).pathname.split("/").filter(Boolean).pop() || "video.mp4";
-        temporaryLink.href = objectUrl;
-        temporaryLink.download = filename.toLowerCase().endsWith(".mp4") ? filename : "video.mp4";
-        document.body.appendChild(temporaryLink);
-        temporaryLink.click();
-        temporaryLink.remove();
-
-        setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
-        showStatus("MP4を保存する処理を開始しました。iPadのダウンロード一覧または「ファイル」アプリを確認してください。", "success");
-      } catch (error) {
-        // CORS未許可などで直接取得できない場合のフォールバック
-        showStatus("配布元がブラウザからの直接取得を許可していないため、動画ページを開きます。iPadの共有ボタンから「ファイルに保存」を選んでください。", "info");
-        // ポップアップブロックを避けるため、自動で新しいタブは開かない。
-        // ユーザーが「元のURLを開く」を押してから共有メニューを使う。
-      } finally {
-        downloadLink.textContent = originalText;
-        downloadLink.classList.remove("disabled");
       }
-    });
 
-    analyzeBtn.addEventListener("click", analyze);
-    urlInput.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") analyze();
-    });
-    openLink.addEventListener("click", () => {
-      if (currentUrl) window.open(currentUrl, "_blank");
-    });
-    clearBtn.addEventListener("click", () => {
-      urlInput.value = "";
-      hideStatus();
-      resetResult();
-      urlInput.focus();
-    });
-  </script>
+      if (
+        blob.type &&
+        !blob.type.toLowerCase().includes("video/mp4") &&
+        !blob.type.toLowerCase().includes("application/octet-stream")
+      ) {
+
+        throw new Error("取得したファイルがMP4ではありません。");
+
+      }
+
+      // 動画データを保存
+      currentBlob = blob;
+
+      currentObjectURL =
+        URL.createObjectURL(blob);
+
+      mp4Player.src = currentObjectURL;
+
+      mp4Player.load();
+
+      // 保存情報
+      mp4State.textContent = "取得成功";
+
+      mp4Size.textContent =
+        formatSize(blob.size);
+
+      mp4Name.textContent =
+        currentFileName;
+
+      mp4Download.disabled = false;
+
+      setStatus(
+        "MP4ファイルの取得に成功しました。プレビューと保存が利用できます。"
+      );
+
+    }
+
+    catch (error) {
+
+      if (error.name === "AbortError") {
+
+        return;
+
+      }
+
+      currentBlob = null;
+
+      mp4Download.disabled = true;
+
+      mp4State.textContent = "直接取得できません";
+
+      mp4Size.textContent = "取得できませんでした";
+
+      setStatus(
+        "MP4ファイルを直接取得できませんでした。CORS制限、URLの有効期限、アクセス権限などを確認してください。動画プレビューは引き続き試します。"
+      );
+
+      // CORS制限があっても、video要素で
+      // 再生できる場合がある
+      mp4Player.src = url;
+
+      mp4Player.load();
+
+    }
+
+  }
+
+  // ====================================
+  // MP4保存処理
+  // ====================================
+
+  mp4Download.addEventListener("click", () => {
+
+    if (!currentBlob) {
+
+      setStatus("保存可能な動画データがありません。");
+
+      return;
+
+    }
+
+    const downloadURL =
+      URL.createObjectURL(currentBlob);
+
+    const link =
+      document.createElement("a");
+
+    link.href = downloadURL;
+
+    link.download = currentFileName;
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    link.remove();
+
+    setStatus(
+      "ファイル保存を開始しました。iPadの場合はダウンロード先を確認してください。"
+    );
+
+    setTimeout(() => {
+
+      URL.revokeObjectURL(downloadURL);
+
+    }, 60000);
+
+  });
+
+  // ====================================
+  // ボタン処理
+  // ====================================
+
+  analyzeBtn.addEventListener("click", analyzeURL);
+
+  input.addEventListener("keydown", (event) => {
+
+    if (event.key === "Enter") {
+
+      analyzeURL();
+
+    }
+
+  });
+
+  clearBtn.addEventListener("click", () => {
+
+    input.value = "";
+
+    resetPlayers();
+
+    setStatus("動画URLを入力してください。");
+
+  });
+
+})();
+</script>
+
 </body>
 </html>
+```
